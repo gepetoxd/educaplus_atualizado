@@ -10,6 +10,7 @@ import Planner from "./pages/Planner";
 import Library from "./pages/Library";
 import Diary from "./pages/Diary";
 import Profile from "./pages/Profile";
+import { PrivateRoute } from "./routes/PrivateRoute";
 
 export const router = createBrowserRouter([
   {
@@ -30,7 +31,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/app",
-    element: <DashboardLayout />,
+    element: (
+    <PrivateRoute>
+      <DashboardLayout />
+    </PrivateRoute>
+  ),
     children: [
       {
         index: true,

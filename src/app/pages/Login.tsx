@@ -5,32 +5,41 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { GraduationCap } from "lucide-react";
+import { api } from "../services/api";
 
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Mock authentication
-    const user = {
-      email,
-      name: email.split("@")[0],
-      role: "Teacher",
-      isAuthenticated: true,
-    };
-    
-    localStorage.setItem("user", JSON.stringify(user));
-    
-    // Check if diagnosis is completed
-    const diagnosisCompleted = localStorage.getItem("diagnosisCompleted");
-    
-    if (diagnosisCompleted) {
-      navigate("/app");
-    } else {
-      navigate("/diagnosis");
+
+    try {
+      const response = await api.post("/auth/login", {
+        email,
+        password,
+      });
+
+      const { access_token, user } = response.data;
+      console.log("Login OK", response.data);
+
+      localStorage.setItem("token", access_token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      console.log("USER:", user);
+
+      const diagnosisCompleted = localStorage.getItem("diagnosisCompleted");
+      console.log("diagnosisCompleted:", diagnosisCompleted);
+
+      if (diagnosisCompleted) {
+        navigate("/app");
+      } else {
+        navigate("/diagnosis");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao fazer login");
     }
   };
 

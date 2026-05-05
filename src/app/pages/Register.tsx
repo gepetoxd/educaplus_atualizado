@@ -6,29 +6,42 @@ import { Label } from "../components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { GraduationCap } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { api } from "../services/api";
 
 export default function Register() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState("USER");
+  const [open, setOpen] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Mock registration
-    const user = {
-      email,
-      name,
-      role,
-      isAuthenticated: true,
-    };
-    
-    localStorage.setItem("user", JSON.stringify(user));
-    
-    // Navigate to diagnosis on first login
-    navigate("/diagnosis");
+
+    try {
+      const response = await api.post("/auth/register", {
+        name,
+        email,
+        password,
+        role,
+      });
+
+      const { access_token, user } = response.data;
+
+      localStorage.setItem("token", access_token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+
+      setOpen(false); // garante que fechou
+
+      setTimeout(() => {
+        navigate("/app");
+      }, 0);
+    } catch (error: any) {
+        const message = error?.response?.data?.message || "Erro ao cadastrar";
+        alert(message);
+      }
   };
 
   return (
@@ -52,7 +65,7 @@ export default function Register() {
               <Input
                 id="name"
                 type="text"
-                placeholder="João Silva"
+                placeholder="BBcrat"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -85,14 +98,23 @@ export default function Register() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="role">Função</Label>
-              <Select value={role} onValueChange={setRole} required>
+              <Select
+                open={open}
+                onOpenChange={setOpen}
+                value={role}
+                onValueChange={(value) => {
+                  setRole(value);
+                  setOpen(false); // fecha manualmente
+                }}
+              >
                 <SelectTrigger className="bg-white">
                   <SelectValue placeholder="Selecione sua função" />
                 </SelectTrigger>
+
                 <SelectContent>
-                  <SelectItem value="teacher">Professor(a)</SelectItem>
-                  <SelectItem value="coordinator">Coordenador(a) Pedagógico(a)</SelectItem>
-                  <SelectItem value="special-ed">Profissional de Educação Especial</SelectItem>
+                  <SelectItem value="TEACHER">Professor(a)</SelectItem>
+                  <SelectItem value="COORDINATOR">Coordenador(a)</SelectItem>
+                  <SelectItem value="SPECIAL_ED">Educação Especial</SelectItem>
                 </SelectContent>
               </Select>
             </div>

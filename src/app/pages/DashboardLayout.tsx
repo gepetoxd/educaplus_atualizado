@@ -12,6 +12,7 @@ import {
   Menu,
   X
 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
@@ -21,15 +22,26 @@ export default function DashboardLayout() {
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
-    if (!userData) {
+
+    if (!userData || userData === "undefined") {
       navigate("/login");
       return;
     }
-    setUser(JSON.parse(userData));
+
+    try {
+      const parsedUser = JSON.parse(userData);
+      setUser(parsedUser);
+    } catch (error) {
+      console.error("Erro ao fazer parse do user:", error);
+      localStorage.removeItem("user");
+      navigate("/login");
+    }
   }, [navigate]);
 
+  const { logout } = useAuth();
+
   const handleLogout = () => {
-    localStorage.removeItem("user");
+    logout();
     navigate("/login");
   };
 
