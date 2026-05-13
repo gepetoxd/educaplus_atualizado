@@ -5,6 +5,7 @@ type AuthContextType = {
   user: any;
   loading: boolean;
   isAuthenticated: boolean;
+  login: (userData: any) => void;
   logout: () => void;
 };
 
@@ -25,11 +26,15 @@ export function AuthProvider({ children }: any) {
 
       try {
         const response = await api.get("/users/me");
+
         setUser(response.data);
       } catch (error) {
         console.error("Token inválido");
+
         localStorage.removeItem("token");
         localStorage.removeItem("user");
+
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -38,9 +43,14 @@ export function AuthProvider({ children }: any) {
     loadUser();
   }, []);
 
+  function login(userData: any) {
+    setUser(userData);
+  }
+
   function logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+
     setUser(null);
   }
 
@@ -50,6 +60,7 @@ export function AuthProvider({ children }: any) {
         user,
         loading,
         isAuthenticated: !!user,
+        login,
         logout,
       }}
     >

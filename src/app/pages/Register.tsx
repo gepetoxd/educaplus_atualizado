@@ -7,9 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { GraduationCap } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { api } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,12 +34,12 @@ export default function Register() {
       localStorage.setItem("token", access_token);
       localStorage.setItem("user", JSON.stringify(user));
 
+      login(user);
 
-      setOpen(false); // garante que fechou
+      setOpen(false);
 
-      setTimeout(() => {
-        navigate("/app");
-      }, 0);
+      navigate("/diagnosis");
+
     } catch (error: any) {
         const message = error?.response?.data?.message || "Erro ao cadastrar";
         alert(message);
